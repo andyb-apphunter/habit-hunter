@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en-AU" data-skin="lavender">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Habit Hunter</title>
+<meta name="description" content="A calm, private habit tracker for your phone.">
+<meta name="theme-color" content="#F6F3FB">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habit Hunter">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="firebase.js"></script>
+<script>const FIREBASE_CONFIG={"apiKey": "AIzaSyC6qmnmWBp2eqrLvoioo14orfg1xnIAhKE", "authDomain": "habit-hunter-e1b6b.firebaseapp.com", "projectId": "habit-hunter-e1b6b", "storageBucket": "habit-hunter-e1b6b.firebasestorage.app", "messagingSenderId": "595260086598", "appId": "1:595260086598:web:7a2106e09f72f2a276ad47"};</script>
+</head>
+<body>
+<style>
+@font-face{font-family:"Nunito";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/nunito-400.woff2") format("woff2")}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/nunito-600.woff2") format("woff2")}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/nunito-700.woff2") format("woff2")}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/nunito-800.woff2") format("woff2")}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:900;font-display:swap;src:url("fonts/nunito-900.woff2") format("woff2")}
+/* Layout: one thumb-reach column with tabs along the bottom, in Spine Hunter's pastel family. */
+:root {
+  --bg:#F6F3FB; --card:#FFFFFF; --line:#E6DFF2; --text:#4B4459; --muted:#716A82;
+  --purple:#DCCFF3; --purple-strong:#7C60BC; --blue:#D5E7F8; --pink:#FADDE8; --pink-strong:#B8487A; --on-strong:#FFFFFF;
+  --h0:#DCCFF3; --e0:#8A6FCB; --h1:#D5E7F8; --e1:#4F86BE; --h2:#FADDE8; --e2:#CC5F8C;
+  --h3:#D3EFE3; --e3:#3E9673; --h4:#FBE8C8; --e4:#B9832B; --h5:#E3E0EA; --e5:#7A7390;
+  --h6:#F9D6CF; --e6:#D2634E; --h7:#CDECEE; --e7:#2F9AA3; --h8:#E4EDBE; --e8:#84972B; --h9:#D4D8F7; --e9:#5A67C9;
+  --heat0:#EDE8F6; --heat1:#D9CCF1; --heat2:#BFA9E5; --heat3:#9F86D6; --heat4:#7C60BC;
+  --font:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+/* Themes. Lavender follows the phone's light or dark setting; the others are fixed. */
+@media (prefers-color-scheme: dark) { :root:not([data-skin]), :root[data-skin="lavender"] {
+  --bg:#1E1A27; --card:#2A2536; --line:#3D364C; --text:#EEE9F7; --muted:#ABA3BD;
+  --purple:#4A3D6B; --purple-strong:#B9A2EE; --blue:#2F4560; --pink:#5A3045; --pink-strong:#F19CC0; --on-strong:#1E1A27;
+  --h0:#4A3D6B; --e0:#B9A2EE; --h1:#2F4560; --e1:#8DBBEA; --h2:#5A3045; --e2:#F19CC0;
+  --h3:#27493C; --e3:#7FD0AE; --h4:#54442A; --e4:#E5BA70; --h5:#403B4D; --e5:#B4ADC6;
+  --h6:#5C3329; --e6:#F0A08E; --h7:#1F4A4E; --e7:#6FD0D8; --h8:#434C1F; --e8:#C5D86A; --h9:#333A68; --e9:#9AA5F0;
+  --heat0:#352F43; --heat1:#4F4270; --heat2:#6F5C9F; --heat3:#9680CC; --heat4:#BFA9F2; color-scheme:dark;
+} }
+:root[data-skin="midnight"] {
+  --bg:#1E1A27; --card:#2A2536; --line:#3D364C; --text:#EEE9F7; --muted:#ABA3BD;
+  --purple:#4A3D6B; --purple-strong:#B9A2EE; --blue:#2F4560; --pink:#5A3045; --pink-strong:#F19CC0; --on-strong:#1E1A27;
+  --h0:#4A3D6B; --e0:#B9A2EE; --h1:#2F4560; --e1:#8DBBEA; --h2:#5A3045; --e2:#F19CC0;
+  --h3:#27493C; --e3:#7FD0AE; --h4:#54442A; --e4:#E5BA70; --h5:#403B4D; --e5:#B4ADC6;
+  --h6:#5C3329; --e6:#F0A08E; --h7:#1F4A4E; --e7:#6FD0D8; --h8:#434C1F; --e8:#C5D86A; --h9:#333A68; --e9:#9AA5F0;
+  --heat0:#352F43; --heat1:#4F4270; --heat2:#6F5C9F; --heat3:#9680CC; --heat4:#BFA9F2; color-scheme:dark;
+}
+:root[data-skin="business"] { --bg:#F3F5F8; --card:#FFFFFF; --line:#DCE1E8; --text:#1E2A36; --muted:#56616E; --purple:#DCE6F2; --purple-strong:#1F4E79; --blue:#E4EAF1; --pink:#D6E2EF; --pink-strong:#B42318; --on-strong:#FFFFFF; --heat0:#E5EAF0; --heat1:#BFD0E3; --heat2:#8EADCF; --heat3:#5682B3; --heat4:#1F4E79; --font:"Segoe UI",Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;}
+:root[data-skin="sunny"] { --bg:#FFF8EC; --card:#FFFFFF; --line:#F2E2C4; --text:#46391F; --muted:#735F3F; --purple:#FFE2A6; --purple-strong:#C9700A; --blue:#FFEFD1; --pink:#FFD7B5; --pink-strong:#B23C0B; --on-strong:#FFFFFF; --heat0:#F9EEDA; --heat1:#FAD98C; --heat2:#F4BC4C; --heat3:#E59A1B; --heat4:#C47706; }
+:root[data-skin="winter"] { --bg:#F0F5FA; --card:#FFFFFF; --line:#D7E4EF; --text:#21364A; --muted:#566E82; --purple:#D5E6F4; --purple-strong:#2D74AF; --blue:#E2EFF8; --pink:#C6DDF0; --pink-strong:#A8325A; --on-strong:#FFFFFF; --heat0:#E3EDF5; --heat1:#BBD5EB; --heat2:#8AB7DC; --heat3:#5594C7; --heat4:#2A6CA3; }
+:root[data-skin="christmas"] { --bg:#FBF6F0; --card:#FFFFFF; --line:#EADDD0; --text:#3A2924; --muted:#6B564E; --purple:#F5D8D4; --purple-strong:#B02A20; --blue:#D9ECDF; --pink:#F5D8D4; --pink-strong:#B02A20; --on-strong:#FFFFFF; --heat0:#E8F0E9; --heat1:#BEDBC6; --heat2:#8ABF99; --heat3:#4C9866; --heat4:#1D6B41; }
+
+/* Business: squarer corners and a neutral typeface. */
+[data-skin="business"] .card,[data-skin="business"] .panel{border-radius:10px}
+[data-skin="business"] .btn,[data-skin="business"] nav button,[data-skin="business"] .tile,[data-skin="business"] .tick,
+[data-skin="business"] textarea,[data-skin="business"] input,[data-skin="business"] select,[data-skin="business"] .days button,
+[data-skin="business"] .swatches button,[data-skin="business"] .sess,[data-skin="business"] .status{border-radius:7px}
+[data-skin="business"] .chip{border-radius:5px}
+[data-skin="business"] .panel{border-radius:14px 14px 0 0}
+[data-skin="business"] h1{letter-spacing:-.01em}
+/* Christmas: a candy-cane progress bar and a red trim on the tab bar. */
+[data-skin="christmas"] .progress div{background:repeating-linear-gradient(135deg,#B02A20 0 8px,#E9B8B2 8px 13px)}
+[data-skin="christmas"] nav{border-top:3px solid #1D6B41}
+/* Sunny and Winter: a soft wash at the top of the screen. */
+[data-skin="sunny"] body{background:linear-gradient(#FFEFCF 0,var(--bg) 220px) no-repeat,var(--bg)}
+[data-skin="winter"] body{background:linear-gradient(#DDEBF6 0,var(--bg) 220px) no-repeat,var(--bg)}
+.themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.theme{min-height:64px;border-radius:14px;padding:10px 12px;text-align:left;border:2px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.theme[aria-pressed="true"]{border-color:var(--purple-strong)}
+.theme .dots{display:flex;gap:4px}.theme .dots i{width:16px;height:16px;border-radius:50%;display:block;border:1px solid rgba(0,0,0,.08)}
+.theme b{font-size:14px;font-weight:800}
+.beta{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:var(--blue);border-radius:8px;padding:3px 8px;color:var(--text)}
+.list{display:flex;flex-direction:column;gap:8px}
+.fb{background:var(--bg);border-radius:12px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+html { background:var(--bg); }
+body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font:600 15px/1.4 var(--font); -webkit-tap-highlight-color:transparent; }
+button,input,select,textarea { font:inherit; color:inherit; }
+button { cursor:pointer; border:0; background:none; touch-action:manipulation; }
+:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px; }
+#wrap { max-width:640px; margin:0 auto; padding-block:calc(14px + env(safe-area-inset-top,0px)) calc(92px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); }
+#view { display:flex; flex-direction:column; gap:10px; }
+h1 { font-size:24px; font-weight:800; margin:0; text-wrap:balance; line-height:1.15; }
+h2 { font-size:16px; font-weight:800; margin:0; }
+.head { display:flex; align-items:center; gap:8px; min-height:44px; }
+.head h1 { flex:1; min-width:0; }
+.muted { color:var(--muted); }
+.small { font-size:13px; }
+.label { font-size:13px; font-weight:800; color:var(--muted); }
+.btn { min-height:44px; padding:0 16px; border-radius:14px; font-weight:800; background:var(--purple); white-space:nowrap; }
+.btn.pink { background:var(--pink); }
+.btn.blue { background:var(--blue); }
+.btn.ghost { background:var(--card); border:1px solid var(--line); font-weight:700; }
+.btn.slim { min-height:36px; padding:0 12px; border-radius:11px; font-size:14px; }
+.btn.icon { width:44px; padding:0; flex:none; }
+.btn:disabled { opacity:.4; cursor:default; }
+.card { background:var(--card); border-radius:18px; padding:14px; min-width:0; }
+.progress { height:10px; border-radius:5px; background:var(--line); overflow:hidden; }
+.progress div { height:100%; background:var(--purple-strong); border-radius:5px; transition:width .2s; }
+.row { display:flex; align-items:center; gap:12px; }
+.grow { flex:1; min-width:0; }
+.name { font-size:16px; font-weight:800; overflow-wrap:anywhere; }
+.faded .name { color:var(--muted); }
+.tick { width:44px; height:44px; flex:none; border-radius:14px; display:grid; place-items:center; background:var(--hfill); border:2px solid var(--hedge); }
+.tick svg { width:24px; height:24px; visibility:hidden; }
+.tick[aria-pressed="true"] { background:var(--hedge); }
+.tick[aria-pressed="true"] svg { visibility:visible; }
+.tick svg path { stroke:var(--on-strong); }
+.c0{--hfill:var(--h0);--hedge:var(--e0)} .c1{--hfill:var(--h1);--hedge:var(--e1)} .c2{--hfill:var(--h2);--hedge:var(--e2)}
+.c3{--hfill:var(--h3);--hedge:var(--e3)} .c4{--hfill:var(--h4);--hedge:var(--e4)} .c5{--hfill:var(--h5);--hedge:var(--e5)}
+.c6{--hfill:var(--h6);--hedge:var(--e6)} .c7{--hfill:var(--h7);--hedge:var(--e7)} .c8{--hfill:var(--h8);--hedge:var(--e8)} .c9{--hfill:var(--h9);--hedge:var(--e9)}
+.note { margin-top:10px; padding-top:10px; border-top:1px solid var(--line); white-space:pre-wrap; overflow-wrap:anywhere; display:flex; gap:8px; align-items:flex-start; justify-content:space-between; }
+.note span { min-width:0; }
+.linkish { color:var(--muted); font-weight:800; font-size:14px; min-height:36px; padding:0 4px; flex:none; text-decoration:underline; }
+textarea, input[type=text], input[type=number], input[type=date], input[type=search], select {
+  width:100%; min-height:44px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--bg); font-size:16px; font-weight:600; }
+textarea { resize:vertical; min-height:72px; display:block; }
+.tick { padding:0; }
+.tick .amt { font-size:11px; font-weight:800; line-height:1.15; color:var(--text); text-align:center; font-variant-numeric:tabular-nums; }
+.sessions { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.sess { min-height:36px; padding:0 10px; border-radius:11px; background:var(--hfill); font-size:14px; font-weight:700; }
+.logger { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.logger .chips { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.logger .custom { display:flex; gap:8px; align-items:center; }
+.logger input { flex:1; min-width:0; }
+.editor { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.editor .btn { align-self:flex-end; }
+.section { margin:10px 0 0; }
+.actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.tiles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.tile { background:var(--card); border-radius:14px; padding:10px 12px; min-width:0; }
+.tile b { display:block; font-size:19px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.2; }
+.tile span { font-size:12px; color:var(--muted); display:block; line-height:1.25; margin-top:2px; }
+.heat-scroll { overflow-x:auto; margin:10px -14px 0; padding:0 14px 4px; }
+.heat { display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,14px); grid-auto-columns:14px; gap:3px; width:max-content; }
+.heat i { display:block; border-radius:3px; cursor:pointer; }
+.heat i.now { outline:2px solid var(--text); outline-offset:-1px; }
+.months { display:grid; grid-auto-flow:column; grid-auto-columns:14px; gap:3px; width:max-content; font-size:11px; color:var(--muted); height:16px; }
+.months span { white-space:nowrap; overflow:visible; }
+.legend { display:flex; gap:4px; align-items:center; font-size:12px; color:var(--muted); margin-top:8px; }
+.legend i { width:12px; height:12px; border-radius:3px; display:block; }
+.bars { position:relative; height:130px; display:flex; align-items:flex-end; gap:4px; margin:12px 0 0 34px; border-bottom:1px solid var(--line); }
+.bars::before { content:""; position:absolute; inset:0 0 50% 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); pointer-events:none; }
+.yaxis { position:absolute; left:-34px; font-size:11px; color:var(--muted); transform:translateY(-50%); font-variant-numeric:tabular-nums; }
+.bar { flex:1; min-width:0; height:100%; display:flex; align-items:flex-end; justify-content:center; padding:0; position:relative; z-index:1; }
+.bar i { display:block; width:100%; max-width:26px; background:var(--purple-strong); border-radius:4px 4px 0 0; }
+.bar[aria-pressed="true"] i { background:var(--pink-strong); }
+.xlab { display:flex; gap:4px; margin:4px 0 0 34px; font-size:11px; color:var(--muted); }
+.xlab span { flex:1; min-width:0; text-align:center; white-space:nowrap; }
+.readout { min-height:20px; margin-top:6px; font-size:13px; color:var(--muted); }
+.kv { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:8px; }
+.kv b { display:block; font-weight:800; font-variant-numeric:tabular-nums; }
+.kv span { font-size:12px; color:var(--muted); display:block; line-height:1.2; }
+.chip { display:inline-block; padding:2px 10px; border-radius:9px; background:var(--hfill); font-size:13px; font-weight:800; overflow-wrap:anywhere; }
+.filters { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+nav { position:fixed; left:0; right:0; bottom:0; z-index:5; background:var(--card); border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px)); }
+nav div { max-width:640px; margin:0 auto; display:grid; grid-template-columns:repeat(5,1fr); gap:3px; }
+nav button { min-height:50px; border-radius:14px; font-weight:800; font-size:13px; color:var(--muted); padding:0 2px; }
+nav button[aria-current="page"] { background:var(--purple); color:var(--text); }
+#sheet { position:fixed; inset:0; z-index:10; background:rgba(30,20,50,.45); display:flex; align-items:flex-end; justify-content:center; }
+.panel { background:var(--bg); width:100%; max-width:640px; max-height:92%; overflow-y:auto; border-radius:22px 22px 0 0; display:flex; flex-direction:column; gap:12px;
+  padding-block:18px calc(18px + env(safe-area-inset-bottom,0px)); padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); }
+.field { display:flex; flex-direction:column; gap:4px; }
+.days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.days button { min-height:44px; border-radius:11px; background:var(--card); border:1px solid var(--line); font-size:13px; font-weight:800; }
+.days button[aria-pressed="true"] { background:var(--purple); border-color:var(--purple-strong); }
+.swatches { display:grid; grid-template-columns:repeat(5,44px); gap:8px; }
+.swatches button { width:44px; height:44px; border-radius:13px; background:var(--hfill); border:2px solid transparent; }
+.swatches button[aria-pressed="true"] { border-color:var(--hedge); box-shadow:inset 0 0 0 2px var(--bg); }
+.err { color:var(--pink-strong); font-weight:800; min-height:20px; font-size:14px; }
+.foot { display:flex; justify-content:flex-end; gap:8px; }
+/* Full-screen stats: hide the tabs, use the whole width, bigger charts */
+body.full #wrap { max-width:1200px; padding-block:14px calc(80px + env(safe-area-inset-bottom,0px)); }
+body.full nav { display:none; }
+body.full .bars { height:220px; }
+body.full .heat { grid-template-rows:repeat(7,18px); grid-auto-columns:18px; gap:4px; }
+body.full .months { grid-auto-columns:18px; gap:4px; }
+body.full .tile b { font-size:22px; }
+#fsExit { position:fixed; z-index:6; right:max(16px,env(safe-area-inset-right,0px)); bottom:calc(16px + env(safe-area-inset-bottom,0px)); box-shadow:0 2px 10px rgba(40,25,70,.25); }
+@media (min-width:760px) {
+  body.full .tiles { grid-template-columns:repeat(6,minmax(0,1fr)); }
+  body.full #view { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
+  body.full #view > * { grid-column:1 / -1; }
+  body.full #view > .half { grid-column:auto; }
+}
+#toast { white-space:pre-line; position:fixed; left:16px; right:16px; bottom:calc(76px + env(safe-area-inset-bottom,0px)); z-index:20; max-width:480px; margin:auto; background:var(--text); color:var(--bg); padding:10px 14px; border-radius:12px; font-weight:700; }
+.status { background:var(--blue); border-radius:12px; padding:8px 12px; font-size:14px; }
+.empty { text-align:center; padding:26px 14px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+@media (prefers-reduced-motion: reduce) { .progress div { transition:none; } }
+</style>
+
+<div id="wrap"><main id="view"></main></div>
+<nav aria-label="Sections"><div id="tabs"></div></nav>
+<div id="sheet" hidden></div>
+<div id="toast" role="status" hidden></div>
+<button id="fsExit" class="btn" data-act="fsToggle" hidden>Exit full screen</button>
+
+<script id="logic">
+/* Dates are plain YYYY-MM-DD strings, which also sort correctly. */
+const DAY_NAMES=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const pad=n=>String(n).padStart(2,"0");
+const toISO=d=>`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;
+const utc=s=>new Date(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10)));
+const addDays=(s,n)=>{const d=utc(s);d.setUTCDate(d.getUTCDate()+n);return toISO(d)};
+const weekday=s=>(utc(s).getUTCDay()+6)%7;
+const monday=s=>addDays(s,-weekday(s));
+const daysInMonth=s=>new Date(Date.UTC(+s.slice(0,4),+s.slice(5,7),0)).getUTCDate();
+const monthStart=s=>s.slice(0,8)+"01";
+const monthEnd=s=>s.slice(0,8)+pad(daysInMonth(s));
+const diffDays=(a,b)=>Math.round((utc(a)-utc(b))/864e5);
+const short=s=>`${DAY_NAMES[weekday(s)]} ${+s.slice(8)} ${MONTHS[+s.slice(5,7)-1]}`;
+const nice=s=>`${short(s)} ${s.slice(0,4)}`;
+const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
+const pct=r=>r==null?"–":`${Math.round(r*100)}%`;
+
+const FREQ={daily:"Every day",weekdays:"Certain days of the week",weekly:"A number of times a week",every:"Every few days",monthly:"Once a month"};
+const COLOUR_NAMES=["Purple","Blue","Pink","Green","Amber","Grey","Coral","Teal","Olive","Indigo"];
+const goalType=h=>h.goalType||"once";
+const goalAmount=h=>+h.goalAmount||1;
+const fmtMin=n=>n<60?`${n} min`:`${Math.floor(n/60)} h${n%60?` ${n%60} min`:""}`;
+const fmtAmount=(type,n)=>type==="minutes"?fmtMin(n):plural(n,"time");
+function goalText(h){const t=goalType(h);return t==="once"?"":`${fmtAmount(t,goalAmount(h))} a day`}
+/* A day's record is either a comment string (a plain tick) or {c:comment,s:[session amounts],t:that day's target}. */
+function normEntry(e){if(e==null)return null;if(typeof e==="string")return{c:e,s:[],t:0};return{c:e.c||"",s:e.s||[],t:e.t||0}}
+const entrySum=e=>e.s.reduce((a,b)=>a+b,0);
+const entryComplete=e=>e.t===0||entrySum(e)>=e.t;
+const wanted=h=>String(h.value).split(",").filter(x=>x!=="").map(Number);
+function freqText(h){
+  const v=h.value;
+  if(h.freq==="daily")return"Every day";
+  if(h.freq==="weekdays"){const d=wanted(h).sort((a,b)=>a-b),k=d.join();
+    return k==="0,1,2,3,4"?"Weekdays":k==="5,6"?"Weekends":d.map(i=>DAY_NAMES[i]).join(", ")}
+  if(h.freq==="weekly")return`${plural(+v,"time")} a week`;
+  if(h.freq==="every")return`Every ${v} days`;
+  const n=+v,s=n%100>=11&&n%100<=13?"th":({1:"st",2:"nd",3:"rd"})[n%10]||"th";
+  return`Monthly, on the ${n}${s}`;
+}
+function streakUnit(h,n){return({daily:plural(n,"day"),weekly:plural(n,"week"),monthly:plural(n,"month")})[h.freq]||`${n} in a row`}
+const isPausedOn=(h,d)=>(h.pauses||[]).some(([s,e])=>s<=d&&(e==null||d<e));
+const isActive=(h,d)=>d>=h.start&&!isPausedOn(h,d);
+const monthlyDue=(h,d)=>Math.min(+h.value,daysInMonth(d));
+function count(done,s,e,skip){let n=0;for(const x of done)if(x>=s&&x<=e&&x!==skip)n++;return n}
+function usableDays(h,wk){let n=0;for(let i=0;i<7;i++)if(isActive(h,addDays(wk,i)))n++;return n}
+
+/* Every stretch with a target (a day, a week, a round, a month) from the start date to now. */
+function periods(h,done,now){
+  if(h.start>now)return[];
+  const out=[],add=(s,e,t)=>out.push({start:s,end:e,target:t,got:count(done,s,e),open:e>=now});
+  if(h.freq==="daily"||h.freq==="weekdays"){
+    const w=h.freq==="daily"?null:new Set(wanted(h));
+    for(let d=h.start;d<=now;d=addDays(d,1))if((!w||w.has(weekday(d)))&&isActive(h,d))add(d,d,1);
+  }else if(h.freq==="weekly"){
+    for(let wk=monday(h.start);wk<=now;wk=addDays(wk,7)){const u=usableDays(h,wk);if(u)add(wk,addDays(wk,6),Math.min(+h.value,u))}
+  }else if(h.freq==="every"){
+    const n=+h.value;
+    for(let s=h.start;s<=now;s=addDays(s,n)){let any=false;for(let i=0;i<n&&!any;i++)any=isActive(h,addDays(s,i));if(any)add(s,addDays(s,n-1),1)}
+  }else{
+    for(let m=monthStart(h.start);m<=now;m=addDays(monthEnd(m),1)){
+      const due=m.slice(0,8)+pad(monthlyDue(h,m));
+      if(h.start<=due&&due<=now&&isActive(h,due))add(m,monthEnd(m),1);
+    }
+  }
+  return out;
+}
+/* Unfinished current periods never count against you. */
+function computeStats(h,done,now,since){
+  const st={done:0,due:0,current:0,best:0,total:done.size};let run=0;
+  for(const p of periods(h,done,now)){
+    const credit=Math.min(p.got,p.target),met=p.got>=p.target;
+    if(since==null||(p.end<now?p.end:now)>=since){st.done+=credit;st.due+=p.open?credit:p.target}
+    if(met){run++;st.best=Math.max(st.best,run)}else if(!p.open)run=0;
+  }
+  st.current=run;st.rate=st.due?st.done/st.due:null;return st;
+}
+/* What a habit needs on one day. Returns null if it isn't running that day. */
+function dayState(h,done,d){
+  if(!isActive(h,d))return null;
+  if(h.freq==="daily")return{due:true,note:""};
+  if(h.freq==="weekdays")return{due:wanted(h).includes(weekday(d)),note:""};
+  if(h.freq==="weekly"){
+    const wk=monday(d),end=addDays(wk,6),target=Math.min(+h.value,usableDays(h,wk)),got=count(done,wk,end);
+    const due=count(done,wk,end,d)<target;
+    return{due,note:due?`${Math.min(got,target)} of ${target} this week`:"Target reached this week"};
+  }
+  if(h.freq==="every"){
+    const n=+h.value,s=addDays(d,-(diffDays(d,h.start)%n)),end=addDays(s,n-1),due=count(done,s,end,d)===0;
+    return{due,note:due?`Due by ${short(end)}`:"Already done this round"};
+  }
+  const dd=d.slice(0,8)+pad(monthlyDue(h,d));
+  if(d<dd||dd<h.start)return{due:false,note:""};
+  const due=count(done,monthStart(d),monthEnd(d),d)===0;
+  return{due,note:due?"Due this month":"Already done this month"};
+}
+function nextDue(h,done,d){for(let i=1,x=addDays(d,1);i<=370;i++,x=addDays(x,1)){const s=dayState(h,done,x);if(s&&s.due)return x}return null}
+function weeklyRates(hs,doneOf,weeks,now){
+  const first=addDays(monday(now),-7*(weeks-1)),tally={};
+  for(let i=0;i<weeks;i++)tally[addDays(first,7*i)]=[0,0];
+  for(const h of hs)for(const p of periods(h,doneOf(h.id),now)){
+    const w=monday(p.end<now?p.end:now);
+    if(tally[w]){const c=Math.min(p.got,p.target);tally[w][0]+=c;tally[w][1]+=p.open?c:p.target}
+  }
+  return Object.keys(tally).sort().map(w=>({week:w,rate:tally[w][1]?tally[w][0]/tally[w][1]:null}));
+}
+function trailingRate(hs,doneOf,days,now){
+  const since=addDays(now,-(days-1));let a=0,b=0;
+  for(const h of hs){const s=computeStats(h,doneOf(h.id),now,since);a+=s.done;b+=s.due}
+  return b?a/b:null;
+}
+</script>
+
+<script>
+const TICK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+const localToday=()=>{const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const $=id=>document.getElementById(id);
+const VERSION="0.6.0",BETA=false;
+const S={tab:"Today",today:localToday(),day:localToday(),habits:{},logs:{},settings:{theme:"lavender",lastBackup:null,backupSnooze:null},feedback:[],uid:null,email:"",authKnown:false,signErr:"",loaded:false,slow:false,blocked:"",
+  editing:null,logging:null,full:false,statHabit:"",commentHabit:"",search:"",limit:60,dirty:false,downloads:null,bar:{}};
+
+/* ---------- reading the data ---------- */
+const habits=()=>Object.values(S.habits).sort((a,b)=>(a.created||"").localeCompare(b.created||"")||a.name.localeCompare(b.name));
+function daysOf(hid){const out={};for(const l of Object.values(S.logs))if(l.habit===hid)Object.assign(out,l.days);return out}
+let doneCache=null;
+function doneOf(hid){doneCache=doneCache||{};if(doneCache[hid])return doneCache[hid];const days=daysOf(hid);return doneCache[hid]=new Set(Object.keys(days).filter(d=>entryComplete(normEntry(days[d]))))}
+const touched=()=>{doneCache=null};
+const logId=(hid,day)=>`${hid}_${day.slice(0,4)}`;
+const isDone=(hid,day)=>doneOf(hid).has(day);
+const entryOf=(hid,day)=>{const l=S.logs[logId(hid,day)];return l?normEntry(l.days[day]):null};
+const commentOf=(hid,day)=>{const e=entryOf(hid,day);return e?e.c:""};
+
+/* ---------- saving: your habits live in your account, with an offline copy on each device ---------- */
+const Cloud=window.HHCloud;
+function cloudError(e){console.warn(e);toast(e&&e.code==="permission-denied"?"You're signed out. Sign in again to save changes.":"That change couldn't be saved. Check your connection and try again.")}
+/* Firestore can't hold a list inside a list, so pauses travel as {s,e} pairs. */
+const toCloudHabit=h=>{const{id,...b}=h;return{...b,pauses:(h.pauses||[]).map(([a,e])=>({s:a,e:e==null?null:e}))}};
+const fromCloudHabit=(id,d)=>({...d,id,pauses:(d.pauses||[]).map(p=>Array.isArray(p)?p:[p.s,p.e==null?null:p.e])});
+const toCloudLog=l=>({habit:l.habit,year:l.year,days:{...l.days}});
+function saveLog(id){if(!S.uid)return;const l=S.logs[id];(l?Cloud.setLog(S.uid,id,toCloudLog(l)):Cloud.delLog(S.uid,id)).catch(cloudError)}
+function persist(){if(!S.uid)return;Cloud.setSettings(S.uid,{theme:S.settings.theme||"lavender",lastBackup:S.settings.lastBackup||null,backupSnooze:S.settings.backupSnooze||null}).catch(cloudError)}
+function snapshot(){return{format:1,app:"habit-hunter",version:VERSION,habits:S.habits,logs:S.logs,settings:S.settings}}
+function setDone(hid,day,done){
+  const id=logId(hid,day);
+  if(done){(S.logs[id]=S.logs[id]||{habit:hid,year:+day.slice(0,4),days:{}}).days[day]=commentOf(hid,day)}
+  else if(S.logs[id])delete S.logs[id].days[day];
+  touched();saveLog(id);
+}
+function setComment(hid,day,text){
+  const id=logId(hid,day),t=text.trim();
+  if(!S.logs[id]||!(day in S.logs[id].days))return;
+  const raw=S.logs[id].days[day];
+  if(normEntry(raw).c===t)return;
+  S.logs[id].days[day]=typeof raw==="string"?t:{...raw,c:t};saveLog(id);
+}
+function logSession(h,day,amount){
+  const id=logId(h.id,day),l=S.logs[id]=S.logs[id]||{habit:h.id,year:+day.slice(0,4),days:{}};
+  const e=normEntry(l.days[day])||{c:"",s:[],t:goalAmount(h)};
+  l.days[day]={c:e.c,s:[...e.s,amount],t:e.t===0?0:goalAmount(h)};
+  touched();saveLog(id);
+}
+function removeSession(h,day,i){
+  const id=logId(h.id,day),e=normEntry(S.logs[id].days[day]),s=e.s.filter((_,k)=>k!==i);
+  S.logs[id].days[day]={c:e.c,s,t:e.t};
+  touched();saveLog(id);
+}
+function totalAmount(h){let n=0;for(const v of Object.values(daysOf(h.id)))n+=entrySum(normEntry(v));return n}
+function saveHabit(h){S.habits[h.id]=h;if(S.uid)Cloud.setHabit(S.uid,h.id,toCloudHabit(h)).catch(cloudError)}
+function deleteHabit(h){
+  delete S.habits[h.id];if(S.uid)Cloud.delHabit(S.uid,h.id).catch(cloudError);
+  for(const id of Object.keys(S.logs))if(S.logs[id].habit===h.id){delete S.logs[id];saveLog(id)}
+  touched();
+}
+
+/* ---------- screen updates ---------- */
+function typingInView(){const a=document.activeElement;return a&&$("view").contains(a)&&/^(TEXTAREA|INPUT)$/.test(a.tagName)}
+function render(force){
+  if(!force&&typingInView()){S.dirty=true;return}
+  S.dirty=false;
+  const sc=window.scrollY;
+  $("tabs").innerHTML=["Today","Habits","Stats","Comments","More"].map(t=>`<button data-act="tab" data-v="${t}" ${t===S.tab?'aria-current="page"':""}>${t}</button>`).join("");
+  document.querySelector("nav").hidden=!S.uid;
+  $("view").innerHTML=(S.uid?({Today:viewToday,Habits:viewHabits,Stats:viewStats,Comments:viewComments,More:viewMore})[S.tab]:viewSignIn)();
+  if(S.tab==="Stats"){const h=$("heatScroll");if(h)h.scrollLeft=h.scrollWidth}
+  window.scrollTo(0,sc);
+}
+function banner(){
+  if(S.blocked)return`<div class="status">${esc(S.blocked)}</div>`;
+  return"";
+}
+function addBtn(){return `<button class="btn pink" data-act="add">+ Add</button>`}
+
+function viewToday(){
+  const d=S.day,isToday=d===S.today,due=[],extra=[];
+  for(const h of habits()){const st=dayState(h,doneOf(h.id),d);if(st)(st.due?due:extra).push([h,st])}
+  const n=due.filter(([h])=>isDone(h.id,d)).length,ex=extra.filter(([h])=>isDone(h.id,d)).length;
+  let summary=due.length?`${n} of ${due.length} done${n===due.length?". All done!":""}`:"Nothing due";
+  if(ex)summary+=`, plus ${ex} extra`;
+  let h=banner()+`<div class="head"><h1>${isToday?"Today":short(d)}</h1>${BETA?`<button class="beta" data-act="feedback">Beta</button>`:""}${addBtn()}</div>${backupNudge()}
+  <div class="row"><button class="btn ghost icon" data-act="shift" data-v="-1" aria-label="Previous day">‹</button>
+   <input class="grow" id="jump" type="date" max="${S.today}" value="${d}" aria-label="Choose a date" data-change="jump">
+   <button class="btn ghost icon" data-act="shift" data-v="1" aria-label="Next day" ${isToday?"disabled":""}>›</button>
+   ${isToday?"":`<button class="btn blue" data-act="jumpToday">Today</button>`}</div>`;
+  if(!habits().length){
+    if(S.blocked)return h;
+    h+=S.loaded?`<div class="card empty"><h2>Your first habit</h2><div class="muted">Add something you want to do regularly. It appears here on the days it's due.</div><button class="btn pink" data-act="add">+ Add a habit</button>
+      <div class="label" style="margin-top:8px">Or start with one of these</div><div class="chips" style="justify-content:center">${QUICK.map((q,i)=>`<button class="btn ghost slim" data-act="quick" data-v="${i}">${esc(q.label)}</button>`).join("")}</div></div>`
+      :`<div class="card empty muted">Loading your habits…</div>`;
+    return h;
+  }
+  h+=`<div class="muted small" id="summary">${summary}</div><div class="progress" role="progressbar" aria-valuenow="${n}" aria-valuemax="${due.length}"><div style="width:${due.length?n/due.length*100:0}%"></div></div>`;
+  h+=due.map(([x,st])=>rowToday(x,st,d,false)).join("");
+  if(extra.length)h+=`<div class="label section">Not due, but you can still tick them</div>`+extra.map(([x,st])=>rowToday(x,st,d,true)).join("");
+  return h;
+}
+function rowToday(h,st,d,faded){
+  const done=isDone(h.id,d),stats=computeStats(h,doneOf(h.id),S.today),bits=[freqText(h)];
+  if(st.note)bits.push(st.note);else if(faded&&!done){const nx=nextDue(h,doneOf(h.id),d);if(nx)bits.push(`Next due ${short(nx)}`)}
+  if(stats.current)bits.push(`Streak: ${streakUnit(h,stats.current)}`);
+  const type=goalType(h),e=entryOf(h.id,d),sum=e?entrySum(e):0,target=e&&e.t?e.t:goalAmount(h);
+  if(type!=="once")bits.splice(1,0,sum?`${fmtAmount(type,sum)} of ${fmtAmount(type,target)} today`:goalText(h));
+  const c=e?e.c:"",ed=S.editing&&S.editing.hid===h.id&&S.editing.day===d;
+  const box=type==="once"||done?TICK:`<span class="amt">${sum}<br>of ${target}</span>`;
+  let below="";
+  if(type!=="once"&&S.logging&&S.logging.hid===h.id&&S.logging.day===d){
+    const left=Math.max(target-sum,0)||target;
+    below+=`<div class="logger"><div class="label">How many minutes was this session?</div><div class="chips">${[5,10,15,20,30].map(n=>`<button class="btn ghost slim" data-act="logMin" data-h="${h.id}" data-v="${n}">${n}</button>`).join("")}</div>
+    <div class="custom"><input id="min-${h.id}" type="number" inputmode="numeric" min="1" max="1440" value="${left}" aria-label="Minutes"><button class="btn slim" data-act="logMinInput" data-h="${h.id}">Add</button><button class="btn ghost slim" data-act="logClose">Cancel</button></div></div>`;
+  }
+  if(type!=="once"&&e){
+    if(type==="minutes"&&e.s.length)below+=`<div class="sessions">${e.s.map((n,i)=>`<button class="sess" data-act="rmSess" data-h="${h.id}" data-i="${i}" aria-label="Remove ${fmtMin(n)} session">${fmtMin(n)} ✕</button>`).join("")}</div>`;
+    if(type==="times"&&e.s.length)below+=`<div class="sessions"><button class="linkish" data-act="rmSess" data-h="${h.id}" data-i="${e.s.length-1}">Remove one</button></div>`;
+    if(!e.s.length&&e.t===0)below+=`<div class="sessions"><button class="linkish" data-act="rmTick" data-h="${h.id}">Remove tick</button></div>`;
+  }
+  if(ed)below+=`<div class="editor"><textarea id="note-${h.id}" data-input="note" placeholder="Add a comment (optional)" aria-label="Comment for ${esc(h.name)}">${esc(c)}</textarea><button class="btn slim" data-act="noteDone">Done</button></div>`;
+  else if(c)below+=`<div class="note"><span>${esc(c)}</span><button class="linkish" data-act="noteEdit" data-h="${h.id}">Edit</button></div>`;
+  else if(e&&(done||e.s.length))below+=`<div class="note"><button class="linkish" data-act="noteEdit" data-h="${h.id}">Add comment</button></div>`;
+  return`<div class="card c${h.colour||0} ${faded?"faded":""}"><div class="row">
+    <button class="tick" data-act="tick" data-h="${h.id}" aria-pressed="${done}" aria-label="${esc(h.name)}">${box}</button>
+    <div class="grow"><div class="name">${esc(h.name)}</div><div class="muted small">${esc(bits.join(" · "))}</div></div></div>${below}</div>`;
+}
+
+function viewHabits(){
+  const paused=h=>isPausedOn(h,S.today)?1:0,list=habits().sort((a,b)=>paused(a)-paused(b));
+  let h=banner()+`<div class="head"><h1>Habits</h1>${addBtn()}</div>`;
+  if(!list.length)h+=`<div class="card empty muted">${S.loaded?"No habits yet. Tap + Add to create one.":"Loading your habits…"}</div>`;
+  for(const x of list){
+    const st=computeStats(x,doneOf(x.id),S.today),p=paused(x);
+    h+=`<div class="card c${x.colour||0} ${p?"faded":""}"><div class="row"><span class="chip">${esc(x.name)}${p?" (paused)":""}</span></div>
+    <div class="muted small" style="margin-top:6px">${esc(freqText(x))}${goalType(x)==="once"?"":` · ${goalText(x)}`} · ${x.start>S.today?"Starts":"Started"} ${nice(x.start)}<br>${st.rate==null?"Nothing due yet":pct(st.rate)+" complete"} · Best streak: ${streakUnit(x,st.best)}</div>
+    <div class="actions"><button class="btn ghost slim" data-act="toStats" data-h="${x.id}">Stats</button><button class="btn ghost slim" data-act="toComments" data-h="${x.id}">Comments</button>
+    <button class="btn ghost slim" data-act="edit" data-h="${x.id}">Edit</button><button class="btn ghost slim" data-act="pause" data-h="${x.id}">${p?"Resume":"Pause"}</button>
+    <button class="btn ghost slim" data-act="del" data-h="${x.id}">Delete</button></div></div>`;
+  }
+  return h;
+}
+
+function habitSelect(id,val,change){
+  return`<select id="${id}" data-change="${change}" aria-label="Filter by habit"><option value="">All habits</option>${habits().map(h=>`<option value="${h.id}" ${h.id===val?"selected":""}>${esc(h.name)}</option>`).join("")}</select>`;
+}
+function bars(key,items,fmt,top){
+  const sel=S.bar[key];
+  return`<div class="bars"><span class="yaxis" style="top:0">${fmt(top)}</span><span class="yaxis" style="top:50%">${fmt(top/2)}</span><span class="yaxis" style="top:100%">${fmt(0)}</span>
+  ${items.map((b,i)=>`<button class="bar" data-act="bar" data-k="${key}" data-i="${i}" aria-pressed="${sel===i}" aria-label="${esc(b.tip)}" title="${esc(b.tip)}"><i style="height:${b.value/top*100}%"></i></button>`).join("")}</div>
+  <div class="xlab">${items.map(b=>`<span>${b.show?esc(b.name):""}</span>`).join("")}</div>
+  <div class="readout">${sel!=null&&items[sel]?esc(items[sel].tip):"Tap a bar for its value."}</div>`;
+}
+function viewStats(){
+  if(S.statHabit&&!S.habits[S.statHabit])S.statHabit="";
+  const all=habits(),hs=S.statHabit?[S.habits[S.statHabit]]:all,now=S.today;
+  let h=banner()+`<div class="head"><h1>Stats</h1>${all.length?`<button class="btn ghost" data-act="fsToggle">${S.full?"Exit full screen":"⤢ Full screen"}</button>`:""}</div>`;
+  if(!all.length)return h+`<div class="card empty muted">${S.loaded?"Add a habit and your stats appear here.":"Loading your habits…"}</div>`;
+  h+=habitSelect("statPick",S.statHabit,"statPick");
+  const stats=hs.map(x=>computeStats(x,doneOf(x.id),now));
+  const due=stats.reduce((a,s)=>a+s.due,0),got=stats.reduce((a,s)=>a+s.done,0),total=stats.reduce((a,s)=>a+s.total,0);
+  const pick=f=>{let b=0;stats.forEach((s,i)=>{if(s[f]>stats[b][f])b=i});return streakUnit(hs[b],stats[b][f])};
+  const tiles=[[pct(due?got/due:null),"All time"],[pct(trailingRate(hs,doneOf,7,now)),"Last 7 days"],[pct(trailingRate(hs,doneOf,30,now)),"Last 30 days"],
+    [pick("current"),hs.length>1?"Longest current streak":"Current streak"],[pick("best"),hs.length>1?"Best streak ever":"Best streak"],[total.toLocaleString(),"Times completed"]];
+  h+=`<div class="tiles">${tiles.map(([b,s])=>`<div class="tile"><b>${esc(b)}</b><span>${s}</span></div>`).join("")}</div>`;
+
+  /* calendar */
+  const counts={};for(const x of hs)for(const d of doneOf(x.id))counts[d]=(counts[d]||0)+1;
+  const weeks=52,first=addDays(monday(now),-7*(weeks-1));let cells="",months="",last="";
+  for(let w=0;w<weeks;w++){
+    const wk=addDays(first,7*w),m=wk.slice(5,7);
+    months+=`<span>${m!==last&&w<weeks-1?MONTHS[+m-1]:""}</span>`;last=m;
+    for(let i=0;i<7;i++){const d=addDays(wk,i);
+      if(d>now){cells+="<span></span>";continue}
+      const n=counts[d]||0,mx=Math.max(hs.length,1),lvl=!n?0:mx===1?3:Math.min(4,1+Math.floor((n-1)*4/mx));
+      cells+=`<i class="${d===now?"now":""}" style="background:var(--heat${lvl})" data-act="openDay" data-v="${d}" title="${nice(d)}: ${n} completed"></i>`}
+  }
+  h+=`<div class="card"><h2>Completions over the last year</h2><div class="muted small">Tap a day to open it. Scroll sideways for earlier months.</div>
+  <div class="heat-scroll" id="heatScroll"><div class="months">${months}</div><div class="heat">${cells}</div></div>
+  ${hs.length>1?`<div class="legend">Fewer ${[0,1,2,3,4].map(i=>`<i style="background:var(--heat${i})"></i>`).join("")} More</div>`:`<div class="legend"><i style="background:var(--heat3)"></i> Completed</div>`}</div>`;
+
+  /* charts */
+  const wr=weeklyRates(hs,doneOf,12,now);
+  h+=`<div class="card half"><h2>Completion by week</h2><div class="muted small">Share of what was due, last 12 weeks</div>
+  ${bars("week",wr.map((r,i)=>({name:`${+r.week.slice(8)}/${+r.week.slice(5,7)}`,show:i%3===2,value:r.rate||0,tip:`Week of ${short(r.week)}: ${r.rate==null?"nothing due":pct(r.rate)}`})),v=>`${Math.round(v*100)}%`,1)}</div>`;
+  const wd=[0,0,0,0,0,0,0];for(const x of hs)for(const d of doneOf(x.id))wd[weekday(d)]++;
+  let top=Math.max(...wd,2);if(top%2)top++;
+  h+=`<div class="card half"><h2>Completions by weekday</h2><div class="muted small">Total since you started</div>
+  ${bars("wd",wd.map((n,i)=>({name:DAY_NAMES[i],show:true,value:n,tip:`${DAY_NAMES[i]}: ${plural(n,"completion")}`})),v=>Math.round(v).toLocaleString(),top)}</div>`;
+
+  /* each habit */
+  h+=`<div class="card"><h2>Each habit</h2>${hs.map((x,i)=>{const s=stats[i];
+    return`<div class="c${x.colour||0}" style="margin-top:12px"><span class="chip">${esc(x.name)}${isPausedOn(x,now)?" (paused)":""}</span>
+    <div class="kv"><div><b>${pct(s.rate)}</b><span>All time</span></div><div><b>${pct(trailingRate([x],doneOf,30,now))}</b><span>Last 30 days</span></div>
+    <div><b>${esc(streakUnit(x,s.current))}</b><span>Current streak</span></div><div><b>${esc(streakUnit(x,s.best))}</b><span>Best streak</span></div></div>${goalType(x)==="once"?"":`<div class="muted small" style="margin-top:6px">Total logged: ${fmtAmount(goalType(x),totalAmount(x))}</div>`}</div>`}).join("")}</div>`;
+  return h;
+}
+
+function commentRows(){
+  const out=[],q=S.search.trim().toLowerCase();
+  for(const l of Object.values(S.logs)){const h=S.habits[l.habit];if(!h||(S.commentHabit&&S.commentHabit!==l.habit))continue;
+    for(const[d,raw]of Object.entries(l.days)){const e=normEntry(raw),c=e.c;if(c&&(!q||c.toLowerCase().includes(q)))out.push({h,d,c,n:entrySum(e)})}}
+  return out.sort((a,b)=>b.d.localeCompare(a.d)||a.h.name.localeCompare(b.h.name));
+}
+function commentList(){
+  const rows=commentRows();
+  let h=`<div class="muted small">${plural(rows.length,"comment")}</div>`;
+  if(!rows.length)h+=`<div class="card empty muted">${S.search.trim()?"No comments match that search.":"No comments yet. Tick off a habit on the Today tab to add one."}</div>`;
+  h+=rows.slice(0,S.limit).map(r=>`<div class="card c${r.h.colour||0}"><div class="row"><span class="chip">${esc(r.h.name)}</span><span class="muted small grow">${nice(r.d)}${r.n?` · ${fmtAmount(goalType(r.h),r.n)}`:""}</span></div>
+    <div style="margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere">${esc(r.c)}</div>
+    <div class="actions"><button class="btn ghost slim" data-act="cEdit" data-h="${r.h.id}" data-v="${r.d}">Edit</button><button class="btn ghost slim" data-act="cDel" data-h="${r.h.id}" data-v="${r.d}">Delete</button></div></div>`).join("");
+  if(rows.length>S.limit)h+=`<button class="btn ghost" data-act="more">Show more</button>`;
+  return h;
+}
+function viewComments(){
+  if(S.commentHabit&&!S.habits[S.commentHabit])S.commentHabit="";
+  return banner()+`<div class="head"><h1>Comments</h1></div><div class="filters">${habitSelect("commentPick",S.commentHabit,"commentPick")}
+  <input id="commentSearch" type="search" placeholder="Search" aria-label="Search comments" value="${esc(S.search)}" data-input="search"></div><div id="clist" style="display:flex;flex-direction:column;gap:10px">${commentList()}</div>`;
+}
+
+/* ---------- More: themes, backups, feedback, about ---------- */
+const THEMES=[["lavender","Lavender","The original. Follows your phone's light or dark setting.",["#F6F3FB","#DCCFF3","#7C60BC"]],
+  ["midnight","Midnight","Dark, all the time.",["#1E1A27","#4A3D6B","#B9A2EE"]],
+  ["business","Business","Crisp navy and grey, squarer edges.",["#F3F5F8","#DCE6F2","#1F4E79"]],
+  ["sunny","Sunny","Warm yellows and orange.",["#FFF8EC","#FFE2A6","#C9700A"]],
+  ["winter","Winter","Cool, icy blues.",["#F0F5FA","#D5E6F4","#2D74AF"]],
+  ["christmas","Christmas","Red, pine green and a candy-cane bar.",["#FBF6F0","#F5D8D4","#B02A20"]]];
+const NEWS=[["0.6.0","Sign in with Google. Your habits sync between your phone and laptop, work offline, and stay safe when you clear your browser."],["0.5.0","Runs on its own as an installable app, with everything stored on your phone. Themes, backup and restore, quick-start habits, and a beta feedback box."],
+  ["0.4.0","Full-screen stats with a landscape layout."],["0.3.0","Daily goals: number of times or minutes, split across sessions. Ten colours."],
+  ["0.2.0","Rebuilt for phones."],["0.1.0","First prototype."]];
+function daysSince(iso){return iso?diffDays(S.today,iso.slice(0,10)):null}
+function backupNudge(){
+  return"";
+  if(!habits().length||S.tab!=="Today")return"";
+  const since=daysSince(S.settings.lastBackup),snooze=S.settings.backupSnooze;
+  const oldest=habits().reduce((a,h)=>h.created&&h.created<a?h.created:a,new Date().toISOString());
+  if(since!=null&&since<14)return"";
+  if(since==null&&daysSince(oldest)<7)return"";
+  if(snooze&&snooze>=S.today)return"";
+  return`<div class="status row"><span class="grow">${since==null?"You haven't backed up yet.":`Last backup ${plural(since,"day")} ago.`} A backup protects your habits if your phone is lost or reset.</span><button class="btn slim" data-act="backup">Back up</button><button class="linkish" data-act="snooze" aria-label="Remind me later">Later</button></div>`;
+}
+function viewSignIn(){
+  if(S.blocked)return banner();
+  if(!S.authKnown)return`<div class="card empty muted" style="margin-top:30vh">Loading…</div>`;
+  return`<div class="card empty" style="margin-top:12vh;padding:32px 20px;gap:12px"><img src="icons/icon-192.png" alt="" width="72" height="72" style="border-radius:18px">
+    <h1>Habit Hunter</h1><div class="muted" style="max-width:340px">Sign in to see your habits. They sync between your phone and laptop, and stay safe if you clear your browser.</div>
+    <button class="btn" data-act="signIn">Sign in with Google</button>${S.signErr?`<div class="err" role="alert">${esc(S.signErr)}</div>`:""}
+    <div class="muted small">Only you can see your habits.</div></div>`;
+}
+function viewMore(){
+  const since=daysSince(S.settings.lastBackup);
+  return banner()+`<div class="head"><h1>More</h1>${BETA?`<span class="beta">Beta ${VERSION}</span>`:""}</div>
+  ${BETA?`<div class="card"><h2>Beta feedback</h2><div class="muted small" style="margin-top:4px">Found a bug, got confused, or have an idea? Write it here as you go, then send them all to Andrew.</div>
+    <div class="actions"><button class="btn pink" data-act="feedback">Write feedback</button>${S.feedback.length?`<button class="btn ghost" data-act="fbSend">Send ${plural(S.feedback.length,"note")}</button>`:""}</div>
+    ${S.feedback.length?`<div class="list" style="margin-top:10px">${S.feedback.slice().reverse().map((f,i)=>`<div class="fb"><div class="muted small">${esc(f.type)} · ${nice(f.date)}${f.sent?" · Sent":""}</div>${esc(f.text)}</div>`).join("")}</div>
+    <div class="actions"><button class="linkish" data-act="fbClear">Clear sent notes</button></div>`:""}</div>`:""}
+  <div class="card"><h2>Account</h2><div class="muted small" style="margin-top:4px">Signed in as <b>${esc(S.email)}</b>. Your habits sync to every device where you sign in with this account.</div>
+    <div class="actions"><button class="btn ghost" data-act="signOut">Sign out</button></div></div>
+  <div class="card"><h2>Theme</h2><div class="themes" style="margin-top:10px">${THEMES.map(([k,n,d,c])=>`<button class="theme" data-act="theme" data-v="${k}" aria-pressed="${S.settings.theme===k}" style="background:${c[0]};color:${k==="midnight"?"#EEE9F7":"#3F3850"}"><span class="dots">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span><b>${n}</b></button>`).join("")}</div>
+    <div class="muted small" style="margin-top:8px">${esc((THEMES.find(t=>t[0]===S.settings.theme)||THEMES[0])[2])}</div></div>
+  <div class="card"><h2>Backup</h2><div class="muted small" style="margin-top:4px">Your habits are saved to your account automatically. A backup file is an extra safety net, and is how you bring habits in from another version.</div>
+    <div class="muted small" style="margin-top:6px"><b>${since==null?"Never backed up":since===0?"Last backed up today":`Last backed up ${plural(since,"day")} ago`}</b></div>
+    <div class="actions"><button class="btn" data-act="backup">Back up now</button><label class="btn ghost" for="restoreFile" style="display:inline-flex;align-items:center">Restore from a file</label><input id="restoreFile" type="file" accept=".json,application/json" data-change="restore" hidden></div>
+    <div class="actions"><button class="linkish" data-act="export">Export a spreadsheet (CSV)</button></div></div>
+  <div class="card"><h2>About</h2><div class="muted small" style="margin-top:4px">Habit Hunter ${VERSION}${BETA?" (beta)":""}. Private by design: your habits are stored in your own account and only you can see them. No ads.</div>
+    <div class="label" style="margin-top:10px">What's new</div>${NEWS.map(([v,t])=>`<div class="small" style="margin-top:6px"><b>${v}</b> <span class="muted">${esc(t)}</span></div>`).join("")}
+    <div class="actions"><a class="linkish" href="privacy.html" target="_blank" rel="noopener">Privacy policy</a></div></div>`;
+}
+async function shareFile(name,type,text){
+  const file=new File([text],name,{type});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return true}}
+  catch(e){if(e&&e.name==="AbortError")return false}
+  const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return true;
+}
+async function backup(){
+  const data={...snapshot(),exported:new Date().toISOString()};delete data.feedback;
+  const ok=await shareFile(`habit-hunter-backup-${S.today}.json`,"application/json",JSON.stringify(data));
+  if(ok){S.settings.lastBackup=new Date().toISOString();persist();toast("Backup saved. Keep the file somewhere safe.");render(true)}
+}
+function validBackup(b){return b&&b.app==="habit-hunter"&&b.habits&&typeof b.habits==="object"&&b.logs&&typeof b.logs==="object"}
+function restoreFrom(file){
+  const r=new FileReader();
+  r.onload=()=>{let b=null;try{b=JSON.parse(r.result)}catch(e){}
+    if(!validBackup(b)){toast("That file isn't a Habit Hunter backup.");return}
+    const n=Object.keys(b.habits).length,when=b.exported?nice(b.exported.slice(0,10)):"an unknown date";
+    confirmSheet("Restore this backup?",`It has ${plural(n,"habit")}, saved on ${when}. Everything on this phone now will be replaced.`,"Restore",()=>{
+      S.habits={};for(const[id,h]of Object.entries(b.habits))S.habits[id]={...h,id};
+      S.logs={};for(const[id,l]of Object.entries(b.logs))S.logs[id]={habit:l.habit,year:l.year,days:{...(l.days||{})}};
+      if(b.settings&&b.settings.theme)S.settings.theme=b.settings.theme;
+      const hs={};for(const[id,h]of Object.entries(S.habits))hs[id]=toCloudHabit(h);const ls={};for(const[id,l]of Object.entries(S.logs))ls[id]=toCloudLog(l);
+      Cloud.replaceAll(S.uid,hs,ls).catch(cloudError);touched();applyTheme();persist();S.tab="Today";render(true);toast(`Restored ${plural(n,"habit")}.`)})};
+  r.readAsText(file);
+}
+function applyTheme(){
+  const t=S.settings.theme||"lavender";document.documentElement.dataset.skin=t;try{localStorage.setItem("hh-theme",t)}catch(e){}
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()||"#F6F3FB";
+}
+function feedbackText(){
+  const lines=S.feedback.map(f=>`[${f.type}] ${f.date}${f.screen?` (${f.screen})`:""}\n${f.text}`);
+  return`Habit Hunter ${VERSION} beta feedback\nDevice: ${navigator.userAgent}\n\n${lines.join("\n\n")}`;
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html){$("sheet").innerHTML=`<div class="panel" role="dialog" aria-modal="true">${html}</div>`;$("sheet").hidden=false}
+function closeSheet(){$("sheet").hidden=true;$("sheet").innerHTML="";if(S.dirty)render();}
+let confirmYes=null;
+function confirmSheet(title,msg,yes,fn){confirmYes=fn;
+  openSheet(`<h2>${esc(title)}</h2><div>${esc(msg)}</div><div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn pink" data-act="yes">${esc(yes)}</button></div>`)}
+let F=null;
+const QUICK=[{label:"Read 20 min",name:"Read",freq:"daily",goalType:"minutes",goalAmount:"20",colour:9},
+  {label:"Drink water 3×",name:"Drink water",freq:"daily",goalType:"times",goalAmount:"3",colour:7},
+  {label:"Walk",name:"Walk",freq:"daily",goalType:"once",colour:3},
+  {label:"Exercise 3× a week",name:"Exercise",freq:"weekly",times:"3",goalType:"once",colour:1},
+  {label:"Stretch every 2 days",name:"Stretch",freq:"every",every:"2",goalType:"once",colour:2}];
+function habitForm(h,preset){
+  F=h?{goalType:goalType(h),goalAmount:h.goalAmount||(goalType(h)==="minutes"?"20":"2"),id:h.id,name:h.name,freq:h.freq,start:h.start,colour:h.colour||0,days:h.freq==="weekdays"?wanted(h):[0,1,2,3,4],
+      times:h.freq==="weekly"?h.value:"3",every:h.freq==="every"?h.value:"2",dom:h.freq==="monthly"?h.value:"1",h}
+    :{goalType:"once",goalAmount:"20",name:"",freq:"daily",start:S.today,colour:habits().length%10,days:[0,1,2,3,4],times:"3",every:"2",dom:"1",...(preset||{})};
+  openSheet(`<h2 style="font-size:20px">${h?"Edit habit":"Add a habit"}</h2>
+   <label class="field"><span class="label">What's the habit?</span><input id="fName" type="text" maxlength="60" autocomplete="off" value="${esc(F.name)}"></label>
+   <label class="field"><span class="label">How often?</span><select id="fFreq" data-change="fFreq">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}" ${k===F.freq?"selected":""}>${v}</option>`).join("")}</select></label>
+   <div id="fDetail"></div>
+   <label class="field"><span class="label">Goal on each day it's due</span><select id="fGoal" data-change="fGoal"><option value="once" ${F.goalType==="once"?"selected":""}>Tick it once</option><option value="times" ${F.goalType==="times"?"selected":""}>Do it a number of times</option><option value="minutes" ${F.goalType==="minutes"?"selected":""}>Reach a number of minutes</option></select></label>
+   <div id="fGoalDetail"></div>
+   <label class="field"><span class="label">Start date</span><input id="fStart" type="date" value="${F.start}"></label>
+   <div class="muted small">If you pick a past date, unticked days since then count as missed. You can tick them off later.</div>
+   <div class="field"><span class="label">Colour</span><div class="swatches" id="fSw"></div></div>
+   <div class="err" id="fErr" role="alert"></div>
+   <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="fSave">${h?"Save":"Add habit"}</button></div>`);
+  drawDetail();drawGoal();drawSwatches();
+}
+function drawGoal(){
+  const box=$("fGoalDetail");
+  if(F.goalType==="once"){box.innerHTML="";box.hidden=true;return}
+  box.hidden=false;
+  const m=F.goalType==="minutes";
+  box.innerHTML=`<label class="field"><span class="label">${m?"Minutes a day (1 to 1440)":"Times a day (1 to 50)"}</span><input id="fGoalN" type="number" inputmode="numeric" min="1" max="${m?1440:50}" value="${esc(F.goalAmount)}"></label><div class="muted small" style="margin-top:4px">${m?"Split it into as many sessions as you like, such as 2 x 10 minutes for a 20 minute goal.":"Each tap counts once. You can go past the goal."}</div>`;
+}
+function drawSwatches(){$("fSw").innerHTML=COLOUR_NAMES.map((n,i)=>`<button class="c${i}" data-act="fCol" data-v="${i}" aria-pressed="${i===F.colour}" aria-label="${n}" title="${n}"></button>`).join("")}
+function keepNumbers(){const g=$("fGoalN");if(g)F.goalAmount=g.value;for(const k of["times","every","dom"]){const e=$("f_"+k);if(e)F[k]=e.value}}
+function drawDetail(){
+  const box=$("fDetail");
+  if(F.freq==="daily"){box.innerHTML="";box.hidden=true;return}
+  box.hidden=false;
+  if(F.freq==="weekdays"){box.innerHTML=`<div class="field"><span class="label">Which days?</span><div class="days">${DAY_NAMES.map((d,i)=>`<button data-act="fDay" data-v="${i}" aria-pressed="${F.days.includes(i)}">${d}</button>`).join("")}</div></div>`;return}
+  const [k,cap,hint,min,max]={weekly:["times","Times per week (1 to 7)","Any days count. Weeks run Monday to Sunday.",1,7],
+    every:["every","Every how many days? (2 to 365)","Rounds count from the start date. Any day in the round counts.",2,365],
+    monthly:["dom","Day of the month (1 to 31)","In shorter months it falls on the last day.",1,31]}[F.freq];
+  box.innerHTML=`<label class="field"><span class="label">${cap}</span><input id="f_${k}" type="number" inputmode="numeric" min="${min}" max="${max}" value="${esc(F[k])}"></label><div class="muted small" style="margin-top:4px">${hint}</div>`;
+}
+function saveForm(){
+  keepNumbers();
+  const err=m=>{$("fErr").textContent=m},name=$("fName").value.trim().replace(/\s+/g," "),start=$("fStart").value;
+  if(!name)return err("Give the habit a name.");
+  if(habits().some(h=>h.id!==F.id&&h.name.toLowerCase()===name.toLowerCase()))return err("You already have a habit with that name.");
+  if(!start)return err("Choose a start date.");
+  let value="";
+  if(F.freq==="weekdays"){if(!F.days.length)return err("Pick at least one day.");value=[...F.days].sort((a,b)=>a-b).join(",")}
+  const num=(v,a,b,w)=>{const n=Number(v);if(!Number.isInteger(n)||n<a||n>b){err(`${w} must be a number from ${a} to ${b}.`);return null}return n};
+  if(F.freq==="weekly"&&(value=num(F.times,1,7,"Times per week"))===null)return;
+  if(F.freq==="every"&&(value=num(F.every,2,365,"The number of days"))===null)return;
+  if(F.freq==="monthly"&&(value=num(F.dom,1,31,"The day of the month"))===null)return;
+  let goal=1;
+  if(F.goalType==="minutes"&&(goal=num(F.goalAmount,1,1440,"Minutes a day"))===null)return;
+  if(F.goalType==="times"&&(goal=num(F.goalAmount,1,50,"Times a day"))===null)return;
+  const id=F.id||("h"+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+  saveHabit({id,name,freq:F.freq,value:String(value),goalType:F.goalType,goalAmount:String(goal),start,colour:F.colour,pauses:F.h?F.h.pauses||[]:[],created:F.h?F.h.created:new Date().toISOString()});
+  closeSheet();render(true);
+}
+
+/* ---------- actions ---------- */
+function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{t.hidden=true},4000)}
+function closeEditor(){
+  if(S.editing){const e=$(`note-${S.editing.hid}`);if(e)setComment(S.editing.hid,S.editing.day,e.value);S.editing=null}
+}
+function addMinutes(hid,n){
+  const d=S.day,was=isDone(hid,d);closeEditor();S.logging=null;logSession(S.habits[hid],d,n);
+  if(!was&&isDone(hid,d))S.editing={hid,day:d};
+  render(true);
+}
+function untick(hid,day){if(S.editing&&S.editing.hid===hid)S.editing=null;setDone(hid,day,false);render(true)}
+const A={
+  fsToggle(){setFull(!S.full)},
+  quick(el){habitForm(null,QUICK[+el.dataset.v])},
+  async signIn(){S.signErr="";render(true);try{await Cloud.signIn()}catch(e){const c=e&&e.code||"";
+    S.signErr=c==="auth/popup-closed-by-user"||c==="auth/cancelled-popup-request"?"Sign-in was cancelled. Tap the button to try again."
+      :c==="auth/unauthorized-domain"?"This web address isn't allowed to sign in yet. Check Authorized domains in Firebase."
+      :c==="auth/network-request-failed"?"No connection. Connect to the internet to sign in the first time."
+      :"Sign-in didn't work. Try again.";render(true)}},
+  signOut(){confirmSheet("Sign out?","Your habits stay safe in your account. Sign in again to see them.","Sign out",()=>{S.tab="Today";Cloud.signOut().catch(cloudError)})},
+  theme(el){S.settings.theme=el.dataset.v;applyTheme();persist();render(true)},
+  backup(){backup()},
+  snooze(){S.settings.backupSnooze=addDays(S.today,3);persist();render(true)},
+  feedback(){const from=S.tab;F={screen:from};
+    openSheet(`<h2>Beta feedback</h2><label class="field"><span class="label">What kind?</span><select id="fbType"><option>Bug</option><option>Confusing</option><option>Idea</option><option>Something I liked</option></select></label>
+    <label class="field"><span class="label">Tell me about it</span><textarea id="fbText" rows="5" placeholder="What happened, what you expected, or what would make it better"></textarea></label>
+    <div class="muted small">Saved on your phone until you send it from More.</div>
+    <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="fbSave">Save</button></div>`);setTimeout(()=>{const t=$("fbText");if(t)t.focus()},50)},
+  fbSave(){const t=$("fbText").value.trim();if(!t){toast("Write something first.");return}
+    S.feedback.push({type:$("fbType").value,text:t,date:S.today,screen:F&&F.screen,sent:false});persist();closeSheet();toast("Saved. Send your notes from More when you're ready.");render(true)},
+  async fbSend(){const text=feedbackText();let done=false;
+    try{if(navigator.share){await navigator.share({title:"Habit Hunter feedback",text});done=true}}catch(e){if(e&&e.name==="AbortError")return}
+    if(!done){try{await navigator.clipboard.writeText(text);toast("Copied. Paste it into a message or email to Andrew.");done=true}catch(e){toast("Couldn't share or copy here.")}}
+    if(done){S.feedback=S.feedback.map(f=>({...f,sent:true}));persist();render(true)}},
+  fbClear(){S.feedback=S.feedback.filter(f=>!f.sent);persist();render(true)},
+  tab(el){closeEditor();S.logging=null;S.tab=el.dataset.v;window.scrollTo(0,0);render(true)},
+  add(){closeEditor();render(true);habitForm()},
+  shift(el){closeEditor();S.logging=null;const d=addDays(S.day,+el.dataset.v);S.day=d>S.today?S.today:d;render(true)},
+  jumpToday(){closeEditor();S.day=S.today;render(true)},
+  tick(el){
+    const hid=el.dataset.h,d=S.day,type=goalType(S.habits[hid]);
+    if(type==="times"){const was=isDone(hid,d);closeEditor();S.logging=null;logSession(S.habits[hid],d,1);if(!was&&isDone(hid,d))S.editing={hid,day:d};render(true);return}
+    if(type==="minutes"){closeEditor();S.logging=S.logging&&S.logging.hid===hid?null:{hid,day:d};render(true);return}
+    if(isDone(hid,d)){
+      const box=$(`note-${hid}`),text=box?box.value.trim():commentOf(hid,d);
+      if(text){if(box)setComment(hid,d,text);confirmSheet("Remove this tick?","This day's comment will be deleted as well.","Remove",()=>untick(hid,d));return}
+      untick(hid,d);return;
+    }
+    closeEditor();setDone(hid,d,true);S.editing={hid,day:d};render(true);
+  },
+  logMin(el){addMinutes(el.dataset.h,+el.dataset.v)},
+  logMinInput(el){const n=Number($(`min-${el.dataset.h}`).value);if(!Number.isInteger(n)||n<1||n>1440){toast("Enter whole minutes from 1 to 1440.");return}addMinutes(el.dataset.h,n)},
+  logClose(){S.logging=null;render(true)},
+  rmSess(el){const hid=el.dataset.h,d=S.day,h=S.habits[hid],e=entryOf(hid,d),i=+el.dataset.i;
+    if(e.s.length===1&&e.c){confirmSheet("Remove this session?","It's the only one that day, so the comment will be deleted as well.","Remove",()=>untick(hid,d));return}
+    if(e.s.length===1){untick(hid,d);return}
+    removeSession(h,d,i);render(true)},
+  rmTick(el){const hid=el.dataset.h,d=S.day;
+    if(commentOf(hid,d)){confirmSheet("Remove this tick?","This day's comment will be deleted as well.","Remove",()=>untick(hid,d));return}
+    untick(hid,d)},
+  noteDone(){closeEditor();render(true)},
+  noteEdit(el){closeEditor();S.editing={hid:el.dataset.h,day:S.day};render(true);const e=$(`note-${el.dataset.h}`);if(e)e.focus()},
+  edit(el){habitForm(S.habits[el.dataset.h])},
+  pause(el){const h=S.habits[el.dataset.h],t=S.today;let p=(h.pauses||[]).map(x=>[...x]);
+    if(isPausedOn(h,t)){p=p.map(([s,e])=>[s,e==null?t:e]).filter(([s,e])=>s<e)}else p.push([t,null]);
+    saveHabit({...h,pauses:p});render(true)},
+  del(el){const h=S.habits[el.dataset.h],days=daysOf(h.id),n=Object.keys(days).length,c=Object.values(days).filter(v=>normEntry(v).c).length;
+    confirmSheet(`Delete ${h.name}?`,`This permanently removes the habit, ${plural(n,"completion")} and ${plural(c,"comment")}. To stop it without losing anything, use Pause.`,"Delete",()=>{deleteHabit(h);render(true)})},
+  toStats(el){S.statHabit=el.dataset.h;S.tab="Stats";window.scrollTo(0,0);render(true)},
+  toComments(el){S.commentHabit=el.dataset.h;S.search="";S.tab="Comments";window.scrollTo(0,0);render(true)},
+  bar(el){S.bar[el.dataset.k]=+el.dataset.i;render(true)},
+  openDay(el){setFull(false,true);S.day=el.dataset.v;S.tab="Today";window.scrollTo(0,0);render(true)},
+  more(){S.limit+=60;render(true)},
+  cEdit(el){const hid=el.dataset.h,d=el.dataset.v;F={hid,d};
+    openSheet(`<h2>${esc(S.habits[hid].name)}</h2><div class="muted small">${nice(d)}</div><textarea id="cBox" rows="5" aria-label="Comment">${esc(commentOf(hid,d))}</textarea>
+    <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="cSave">Save</button></div>`)},
+  cSave(){const t=$("cBox").value;setComment(F.hid,F.d,t);closeSheet();render(true)},
+  cDel(el){const hid=el.dataset.h,d=el.dataset.v;confirmSheet("Delete this comment?","The day stays ticked off. Only the comment is removed.","Delete",()=>{setComment(hid,d,"");render(true)})},
+  close(){closeSheet()},
+  yes(){const f=confirmYes;confirmYes=null;closeSheet();if(f)f()},
+  fSave(){saveForm()},
+  fCol(el){F.colour=+el.dataset.v;drawSwatches()},
+  fDay(el){const i=+el.dataset.v;F.days=F.days.includes(i)?F.days.filter(x=>x!==i):[...F.days,i];drawDetail()},
+  async export(){
+    const q=v=>`"${String(v).replace(/"/g,'""')}"`,rows=[["Date","Habit","Comment","Amount"]];
+    for(const h of habits()){const days=daysOf(h.id);for(const d of Object.keys(days)){const e=normEntry(days[d]),n=entrySum(e);rows.push([d,h.name,e.c,n?fmtAmount(goalType(h),n):""])}}
+    const body=[rows[0],...rows.slice(1).sort((a,b)=>a[0].localeCompare(b[0]))].map(r=>r.map(q).join(",")).join("\r\n");
+    await shareFile("Habit Hunter export.csv","text/csv","\ufeff"+body);
+  },
+};
+function setFull(on,quiet){
+  if(S.full===on)return;
+  S.full=on;document.body.classList.toggle("full",on);$("fsExit").hidden=!on;
+  const fs=document.fullscreenElement;
+  try{
+    if(on&&!fs&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+    if(!on&&fs&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+  }catch(e){}
+  if(!quiet){window.scrollTo(0,0);render(true)}
+}
+/* Leaving the browser's full screen (back gesture or Esc) also leaves full-screen stats. */
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&S.full)setFull(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.full&&$("sheet").hidden)setFull(false)});
+window.addEventListener("resize",()=>{if(S.tab==="Stats")render()});
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");
+  if(el&&A[el.dataset.act]){A[el.dataset.act](el);return}
+  if(e.target===$("sheet"))closeSheet();
+});
+document.addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.change;if(!k)return;
+  if(k==="jump"){if(e.target.value&&e.target.value<=S.today){closeEditor();S.day=e.target.value;e.target.blur();render(true)}}
+  if(k==="statPick"){S.statHabit=e.target.value;S.bar={};render(true)}
+  if(k==="commentPick"){S.commentHabit=e.target.value;S.limit=60;render(true)}
+  if(k==="fFreq"){keepNumbers();F.freq=e.target.value;drawDetail()}
+  if(k==="restore"){const f=e.target.files&&e.target.files[0];if(f)restoreFrom(f);e.target.value=""}
+  if(k==="fGoal"){keepNumbers();F.goalType=e.target.value;F.goalAmount=F.goalType==="minutes"?"20":"2";drawGoal()}
+});
+document.addEventListener("input",e=>{
+  if(e.target.dataset&&e.target.dataset.input==="search"){S.search=e.target.value;S.limit=60;$("clist").innerHTML=commentList()}
+});
+/* Whatever is typed is kept, even if you tap away or switch apps. */
+document.addEventListener("focusout",e=>{
+  const t=e.target;
+  if(t.dataset&&t.dataset.input==="note"&&S.editing)setComment(S.editing.hid,S.editing.day,t.value);
+  if(t.closest&&t.closest("#view"))setTimeout(()=>{if(S.dirty&&!typingInView())render()},0);
+});
+function rollDay(){const t=localToday();if(t!==S.today){closeEditor();if(S.day===S.today)S.day=t;S.today=t;render(true)}}
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){if(S.editing){const e=$(`note-${S.editing.hid}`);if(e)setComment(S.editing.hid,S.editing.day,e.value)}}else rollDay();
+});
+setInterval(rollDay,30000);
+
+/* ---------- starting up ---------- */
+async function start(){
+  try{const t=localStorage.getItem("hh-theme");if(t)S.settings.theme=t}catch(e){}
+  applyTheme();render(true);
+  if(!Cloud){S.blocked="Habit Hunter couldn't start. Check your connection, then close and reopen it.";S.authKnown=true;render(true);return}
+  Cloud.init(FIREBASE_CONFIG);
+  let stop=null;
+  Cloud.onUser(u=>{
+    if(stop){stop();stop=null}
+    closeEditor();S.editing=null;S.logging=null;
+    S.authKnown=true;S.uid=u?u.uid:null;S.email=u?(u.email||""):"";S.habits={};S.logs={};S.loaded=false;S.blocked="";touched();
+    if(!u){setFull(false,true);render(true);return}
+    const ready={h:false,l:false},got=k=>{ready[k]=true;if(ready.h&&ready.l)S.loaded=true};
+    stop=Cloud.watch(u.uid,{
+      habits:docs=>{const n={};for(const[id,d]of docs)n[id]=fromCloudHabit(id,d);S.habits=n;got("h");touched();render()},
+      logs:docs=>{const n={};for(const[id,d]of docs)n[id]={habit:d.habit,year:d.year,days:{...(d.days||{})}};S.logs=n;got("l");touched();render()},
+      settings:d=>{if(d){S.settings={...S.settings,...d};applyTheme();render()}},
+      error:e=>{console.warn(e);S.blocked="Your habits couldn't be loaded. Check your connection, then close and reopen the app.";S.loaded=true;render(true)},
+    });
+    render(true);
+  });
+  if("serviceWorker"in navigator&&location.protocol==="https:"&&!window.Capacitor)navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+start();
+</script>
+
+</body>
+</html>
